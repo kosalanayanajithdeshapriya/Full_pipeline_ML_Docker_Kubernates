@@ -1,0 +1,73 @@
+# Backend
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crop-api-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crop-api
+  template:
+    metadata:
+      labels:
+        app: crop-api
+    spec:
+      containers:
+        - name: crop-api
+          image: crop-recommendor
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crop-api-service
+spec:
+  selector:
+    app: crop-api
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+
+# Frontend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crop-frontend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crop-frontend
+  template:
+    metadata:
+      labels:
+        app: crop-frontend
+    spec:
+      containers:
+        - name: crop-frontend
+          image: crop-frontend
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crop-frontend-service
+spec:
+  selector:
+    app: crop-frontend
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 31556

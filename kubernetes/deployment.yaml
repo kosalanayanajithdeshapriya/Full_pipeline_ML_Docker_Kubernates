@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crop-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crop-api
+  template:
+    metadata:
+      labels:
+        app: crop-api
+    spec:
+      containers:
+        - name: crop-api
+          image: crop-recommendor
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
