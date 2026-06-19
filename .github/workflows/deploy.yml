@@ -9,10 +9,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1) Get the latest code in the runner
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ---- CI: basic backend check ----
+      # 2) Simple CI: check backend installs and imports
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -30,7 +31,7 @@ jobs:
           print("FastAPI app imported successfully")
           EOF
 
-      # ---- CD: deploy to EC2 with Docker Compose ----
+      # 3) CD: SSH into EC2 and run docker-compose
       - name: Deploy to EC2 with Docker Compose
         uses: appleboy/ssh-action@v1.0.3
         with:
