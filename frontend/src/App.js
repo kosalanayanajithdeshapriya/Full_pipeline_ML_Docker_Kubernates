@@ -22,7 +22,7 @@ function App() {
 
   // Local dev: call FastAPI directly
 const API_URL =
-  process.env.REACT_APP_API_URL || "http://localhost:8000/predict";
+  process.env.REACT_APP_API_URL || "http://98.93.30.243:8000/predict";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
