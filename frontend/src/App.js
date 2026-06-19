@@ -20,8 +20,10 @@ function MainAppContent() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
 
-  const API_URL =
-    process.env.REACT_APP_API_URL || "http://98.93.30.243:8000/predict";
+  //const API_URL =
+    //process.env.REACT_APP_API_URL || "http://98.93.30.243:8000/predict";
+
+    const API_URL = process.env.REACT_APP_API_URL || "https://croprecommendor.work.gd/predict";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
