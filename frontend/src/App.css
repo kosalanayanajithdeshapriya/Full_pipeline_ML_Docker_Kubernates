@@ -1,8 +1,9 @@
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #0f172a;
-  color: #e5e7eb;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #0b0f19;
+  color: #e2e8f0;
+  -webkit-font-smoothing: antialiased;
 }
 
 .app {
@@ -11,48 +12,80 @@ body {
   flex-direction: column;
 }
 
+/* Ensure foreground layout tags drop seamlessly above back particles layer */
+.header, .main, .footer {
+  position: relative;
+  z-index: 10;
+}
+
 .header {
-  padding: 1.5rem 2rem;
-  background: #020617;
+  padding: 1.75rem 2rem;
+  background: rgba(17, 24, 39, 0.85);
   border-bottom: 1px solid #1f2937;
+  backdrop-filter: blur(8px);
 }
 
 .header h1 {
   margin: 0;
-  font-size: 1.8rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #10b981;
 }
 
 .header p {
-  margin: 0.25rem 0 0;
-  color: #9ca3af;
+  margin: 0.35rem 0 0;
+  color: #94a3b8;
+  font-size: 0.9rem;
 }
 
+/* Dashboard Core Grid Constraints */
 .main {
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
-  gap: 1.5rem;
-  padding: 1.5rem 2rem;
+  grid-template-columns: 2fr 1.2fr;
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1400px;
+  width: calc(100% - 4rem);
+  margin: 0 auto;
 }
 
+@media (max-width: 1024px) {
+  .main {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+    width: calc(100% - 2rem);
+  }
+}
+
+/* Reusable UI Dashboard Panel Cards */
 .card {
-  background: #020617;
+  background: rgba(17, 24, 39, 0.9);
   border-radius: 0.75rem;
   border: 1px solid #1f2937;
-  padding: 1.5rem;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.8);
+  padding: 1.75rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(4px);
 }
 
-.form-card h2,
-.result-card h2 {
+.card h2 {
   margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f8fafc;
+  border-bottom: 1px solid #374151;
+  padding-bottom: 0.5rem;
 }
 
+/* Grid parameters inside the fields selector */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
 }
 
 .field {
@@ -60,67 +93,203 @@ body {
   flex-direction: column;
 }
 
+@media (min-width: 640px) {
+  .full-width-field {
+    grid-column: span 2;
+  }
+}
+
 .field label {
   font-size: 0.85rem;
-  color: #9ca3af;
-  margin-bottom: 0.25rem;
+  font-weight: 500;
+  color: #94a3b8;
+  margin-bottom: 0.5rem;
 }
 
 .field input {
-  padding: 0.5rem 0.6rem;
+  padding: 0.75rem 0.85rem;
   border-radius: 0.5rem;
   border: 1px solid #374151;
-  background: #020617;
-  color: #e5e7eb;
+  background: #1f2937;
+  color: #f8fafc;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
 }
 
 .field input:focus {
   outline: none;
-  border-color: #22c55e;
-  box-shadow: 0 0 0 1px #22c55e33;
+  border-color: #10b981;
+  background: #111827;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
 }
 
-button {
-  margin-top: 1.5rem;
-  padding: 0.6rem 1.4rem;
-  border-radius: 999px;
+/* Call to Action Button Core */
+.submit-btn {
+  align-self: flex-start;
+  margin-top: 2rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: 0.5rem;
   border: none;
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: #020617;
+  background: #10b981;
+  color: #042f1a;
   font-weight: 600;
+  font-size: 0.95rem;
   cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
-button:disabled {
-  opacity: 0.7;
-  cursor: wait;
+.submit-btn:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+}
+
+.submit-btn:disabled {
+  background: #374151;
+  color: #94a3b8;
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Messaging states logic styling */
+.status-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.empty-state {
+  border: 2px dashed #374151;
+  border-radius: 0.5rem;
+  background: rgba(31, 41, 55, 0.15);
 }
 
 .error {
-  margin-top: 0.75rem;
-  color: #f97373;
-}
-
-.highlight {
-  font-size: 1.1rem;
-  margin-top: 0.5rem;
-}
-
-.result-card pre {
   margin-top: 1rem;
-  padding: 0.75rem;
-  background: #020617;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+  padding: 0.75rem 1rem;
   border-radius: 0.5rem;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  font-size: 0.9rem;
+}
+
+/* Result Presentation layout blocks */
+.result-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.visual-display-box {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 0.5rem;
+  padding: 2.25rem 1.5rem;
+  text-align: center;
+}
+
+.result-label {
+  color: #94a3b8;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.crop-name {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #34d399;
+  margin: 0.5rem 0 0;
+  text-transform: capitalize;
+}
+
+/* Inspection expandable accordion panel */
+.json-details {
+  background: #1f2937;
+  border-radius: 0.5rem;
+  border: 1px solid #374151;
+  padding: 0.75rem;
+}
+
+.json-details summary {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+
+.json-details summary:hover {
+  color: #f8fafc;
+}
+
+.json-details pre {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #0b0f19;
+  border-radius: 0.375rem;
   border: 1px solid #1f2937;
   overflow-x: auto;
   font-size: 0.8rem;
+  color: #34d399;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* Background canvas positioning layers overrides */
+#tsparticles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+  background-color: #0b0f19;
+}
+
+.particle-background {
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+}
+
+.particle-background.visible {
+  opacity: 0.85;
+}
+
+/* Loading CSS Spinner markup code components */
+.spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 3px solid #374151;
+  border-top-color: #10b981;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .footer {
-  padding: 0.75rem 2rem;
+  padding: 1rem 2rem;
   text-align: center;
   font-size: 0.8rem;
-  color: #6b7280;
+  color: #475569;
   border-top: 1px solid #1f2937;
-  background: #020617;
+  background: rgba(17, 24, 39, 0.85);
+  backdrop-filter: blur(8px);
+  margin-top: auto;
 }
