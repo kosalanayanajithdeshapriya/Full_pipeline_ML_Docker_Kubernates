@@ -1,10 +1,10 @@
 version: "3.8"
 
 services:
-  api:
+  crop-api-service:
     build:
       context: .
-      dockerfile: Dockerfile        # backend Dockerfile (for FastAPI)
+      dockerfile: Dockerfile
     container_name: crop-api
     restart: unless-stopped
     ports:
@@ -16,10 +16,10 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: dockerfile        # your frontend Dockerfile name
+      dockerfile: Dockerfile
     container_name: crop-frontend
     restart: unless-stopped
     ports:
-      - "80:80"                     # serve React on port 80
+      - "80:80"
     depends_on:
-      - api
+      - crop-api-service
