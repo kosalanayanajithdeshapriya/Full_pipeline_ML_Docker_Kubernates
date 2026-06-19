@@ -1,25 +1,68 @@
 version: "3.8"
 
 services:
+  # 1. FastAPI Model Endpoint Engine
   crop-api-service:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: crop-api
     restart: unless-stopped
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000" # Internal communication within Docker network
     environment:
       - UVICORN_HOST=0.0.0.0
       - UVICORN_PORT=8000
+      - VIRTUAL_HOST=croprecommendor.work.gd
+      - VIRTUAL_PORT=8000
 
+  # 2. Production React Compiled Frontend
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: crop-frontend
     restart: unless-stopped
-    ports:
-      - "80:80"
+    expose:
+      - "80" # Internal communication within Docker network
+    environment:
+      - VIRTUAL_HOST=croprecommendor.work.gd
+      - LETSENCRYPT_HOST=croprecommendor.work.gd
+      - LETSENCRYPT_EMAIL=your-email@example.com # 👈 Replace with your real email for SSL alerts
     depends_on:
       - crop-api-service
+
+  # 3. Automated Nginx Reverse Proxy Engine
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    container_name: nginx-proxy
+    ports:
+      - "80:80"   # Directs public HTTP traffic to the proxy
+      - "443:443" # Directs public secure HTTPS traffic to the proxy
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+    restart: unless-stopped
+
+  # 4. Asynchronous Automated SSL Handler (Let's Encrypt Acme Companion)
+  acme-companion:
+    image: nginxproxy/acme-companion
+    container_name: acme-companion
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - acme:/etc/acme.sh
+    depends_on:
+      - nginx-proxy
+    restart: unless-stopped
+
+# Named volumes used to securely share SSL keys across the proxy containers
+volumes:
+  certs:
+  vhost:
+  html:
+  acme:
