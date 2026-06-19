@@ -1,19 +1,19 @@
-name: CI/CD - Deploy Crop Recommender to EC2
+name: CI/CD - Deploy Crop Recommender via Docker Hub
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Get the latest code in the runner
+      # 1) Fetch latest code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2) Simple CI: check backend installs and imports
+      # 2) CI: Smoke test backend imports
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -31,7 +31,32 @@ jobs:
           print("FastAPI app imported successfully")
           EOF
 
-      # 3) CD: SSH into EC2 and run docker-compose
+      # 3) Log into Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 4) Build & Push Backend Image
+      - name: Build and Push Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: kosala2002/crop-backend:latest
+
+      # 5) Build & Push Frontend Image
+      - name: Build and Push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: kosala2002/crop-frontend:latest
+
+      # 6) CD: SSH into EC2, Pull from Hub, and Deploy
       - name: Deploy to EC2 with Docker Compose
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -41,5 +66,14 @@ jobs:
           script: |
             cd /home/ubuntu/crop-platform
             git pull origin main
+            
+            # Pull the brand new images from Docker Hub onto the EC2 host
+            docker pull kosala2002/crop-backend:latest
+            docker pull kosala2002/crop-frontend:latest
+            
+            # Re-launch containers with the updated images
             docker-compose down || true
-            docker-compose up -d --build
+            docker-compose up -d
+            
+            # Clean up dangling images to optimize your EC2 storage space
+            docker image prune -f

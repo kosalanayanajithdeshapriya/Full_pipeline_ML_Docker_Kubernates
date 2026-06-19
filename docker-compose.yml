@@ -1,11 +1,9 @@
 version: "3.8"
 
 services:
-  # 1. FastAPI Model Endpoint Engine
+  # 1. FastAPI Model Endpoint Engine (Pulled from Docker Hub)
   crop-api-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: kosala2002/crop-backend:latest # 👈 Updated from 'build:' to utilize cloud registry
     container_name: crop-api
     restart: unless-stopped
     expose:
@@ -16,11 +14,9 @@ services:
       - VIRTUAL_HOST=croprecommendor.work.gd
       - VIRTUAL_PORT=8000
 
-  # 2. Production React Compiled Frontend
+  # 2. Production React Compiled Frontend (Pulled from Docker Hub)
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: kosala2002/crop-frontend:latest # 👈 Updated from 'build:' to utilize cloud registry
     container_name: crop-frontend
     restart: unless-stopped
     expose:
@@ -28,7 +24,7 @@ services:
     environment:
       - VIRTUAL_HOST=croprecommendor.work.gd
       - LETSENCRYPT_HOST=croprecommendor.work.gd
-      - LETSENCRYPT_EMAIL=your_real_email@gmail.com # 👈 REPLACE THIS with your actual email address
+      - LETSENCRYPT_EMAIL=your_real_email@gmail.com # 👈 Keep your real email address active here
     depends_on:
       - crop-api-service
 
