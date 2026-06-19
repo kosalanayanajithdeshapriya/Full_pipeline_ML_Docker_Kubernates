@@ -9,7 +9,7 @@ services:
     container_name: crop-api
     restart: unless-stopped
     expose:
-      - "8000" # Internal communication within Docker network
+      - "8000" 
     environment:
       - UVICORN_HOST=0.0.0.0
       - UVICORN_PORT=8000
@@ -24,11 +24,11 @@ services:
     container_name: crop-frontend
     restart: unless-stopped
     expose:
-      - "80" # Internal communication within Docker network
+      - "80" 
     environment:
       - VIRTUAL_HOST=croprecommendor.work.gd
       - LETSENCRYPT_HOST=croprecommendor.work.gd
-      - LETSENCRYPT_EMAIL=your-email@example.com # 👈 Replace with your real email for SSL alerts
+      - LETSENCRYPT_EMAIL=your-email@example.com # Replace with your real email
     depends_on:
       - crop-api-service
 
@@ -37,8 +37,8 @@ services:
     image: nginxproxy/nginx-proxy
     container_name: nginx-proxy
     ports:
-      - "80:80"   # Directs public HTTP traffic to the proxy
-      - "443:443" # Directs public secure HTTPS traffic to the proxy
+      - "80:80"   
+      - "443:443" 
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - certs:/etc/nginx/certs
@@ -50,6 +50,8 @@ services:
   acme-companion:
     image: nginxproxy/acme-companion
     container_name: acme-companion
+    environment:
+      - NGINX_PROXY_CONTAINER=nginx-proxy # 👈 CRITICAL FIX: Explicitly links the proxy container ID
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - certs:/etc/nginx/certs
@@ -60,7 +62,6 @@ services:
       - nginx-proxy
     restart: unless-stopped
 
-# Named volumes used to securely share SSL keys across the proxy containers
 volumes:
   certs:
   vhost:
