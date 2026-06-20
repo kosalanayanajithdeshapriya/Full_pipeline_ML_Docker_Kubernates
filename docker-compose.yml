@@ -3,7 +3,7 @@ version: "3.8"
 services:
   # 1. FastAPI Model Endpoint Engine (Pulled from Docker Hub)
   crop-api-service:
-    image: kosala2002/crop-backend:latest
+    image: kosala2002/crop-backend:latest  # 👈 බැකෙන්ඩ් ඉමේජ් එක මෙතනට විතරයි එන්න ඕනේ!
     container_name: crop-api
     restart: unless-stopped
     expose:
@@ -11,12 +11,12 @@ services:
     environment:
       - UVICORN_HOST=0.0.0.0
       - UVICORN_PORT=8000
-      - VIRTUAL_HOST=croprecommendor.work.gd
-      - VIRTUAL_PORT=8000
 
-  # 2. Production React Compiled Frontend (Pulled from Docker Hub)
+  # 2. Production React Compiled Frontend (Built Locally)
   frontend:
-    image: kosala2002/crop-frontend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile  # 👈 ඔයාගේ ලෝකල් React Dockerfile එක කියවන්නේ මෙතනින්!
     container_name: crop-frontend
     restart: unless-stopped
     expose:
@@ -24,10 +24,10 @@ services:
     environment:
       - VIRTUAL_HOST=croprecommendor.work.gd
       - LETSENCRYPT_HOST=croprecommendor.work.gd
-      - LETSENCRYPT_EMAIL=deshapriyakosala@gmail.com # 👈 ඔයාගේ සැබෑ Email ලිපිනය මෙතනට ඇතුළත් කරන්න
+      - LETSENCRYPT_EMAIL=deshapriyakosala@gmail.com
     volumes:
-      - html:/usr/share/nginx/html  # 👈 FIX: React බිල්ඩ් ෆයිල්ස් ටික Nginx Proxy එකට Share කිරීම
-      - vhost:/etc/nginx/vhost.d    # 👈 FIX: Vhost configurations ටික Proxy එකට Share කිරීම
+      - html:/usr/share/nginx/html
+      - vhost:/etc/nginx/vhost.d
     depends_on:
       - crop-api-service
 
@@ -36,8 +36,8 @@ services:
     image: nginxproxy/nginx-proxy
     container_name: nginx-proxy
     ports:
-      - "80:80"   # Handles public inbound HTTP traffic
-      - "443:443" # Handles public inbound secure HTTPS traffic
+      - "80:80"   
+      - "443:443" 
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - certs:/etc/nginx/certs
@@ -50,7 +50,8 @@ services:
     image: nginxproxy/acme-companion
     container_name: acme-companion
     environment:
-      - NGINX_PROXY_CONTAINER=nginx-proxy # Links the proxy container ID explicitly
+      - ACME_CA_URI=https://acme-staging-v02.api.letsencrypt.org/directory # 👈 Staging URI එක
+      - NGINX_PROXY_CONTAINER=nginx-proxy 
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - certs:/etc/nginx/certs
@@ -61,7 +62,6 @@ services:
       - nginx-proxy
     restart: unless-stopped
 
-# Named volumes used to securely share SSL keys and configs across the proxy containers
 volumes:
   certs:
   vhost:
