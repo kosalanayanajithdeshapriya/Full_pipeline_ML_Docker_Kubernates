@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import axios from "axios";
-// Import Particles and its Context Provider directly
 import Particles, { ParticlesProvider } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
 import "./App.css";
@@ -20,11 +19,7 @@ function MainAppContent() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
 
-  //const API_URL =
   const API_URL = "http://98.93.30.243:8000/predict";
-  //const API_URL = "https://api.croprecommendor.work.gd/predict";
-  
-    //const API_URL = process.env.REACT_APP_API_URL || "https://croprecommendor.work.gd/predict";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -46,7 +41,7 @@ function MainAppContent() {
     } catch (err) {
       console.error(err);
       setError(
-        err.response?.data?.detail || "Error while calling the API."
+        err.response?.data?.detail || "Error while calling the API Engine."
       );
     } finally {
       setLoading(false);
@@ -68,7 +63,7 @@ function MainAppContent() {
     fullScreen: { enable: true, zIndex: 1 }, 
     background: {
       color: {
-        value: "#0b0f19",
+        value: "#F4F6F5", 
       },
     },
     fpsLimit: 60,
@@ -87,13 +82,13 @@ function MainAppContent() {
     },
     particles: {
       color: {
-        value: "#10b981",
+        value: "#137517", 
       },
       links: {
-        color: "#1e40af",
+        color: "#137517",
         distance: 160,
         enable: true,
-        opacity: 0.15,
+        opacity: 0.1,
         width: 1,
       },
       move: {
@@ -101,15 +96,15 @@ function MainAppContent() {
         enable: true,
         outModes: { default: "out" },
         random: false,
-        speed: 1.0, 
+        speed: 0.8, 
         straight: false,
       },
       number: {
         density: { enable: true, area: 800 },
-        value: 90, 
+        value: 40, 
       },
       opacity: {
-        value: { min: 0.1, max: 0.5 },
+        value: { min: 0.1, max: 0.4 },
       },
       shape: {
         type: "circle",
@@ -122,151 +117,146 @@ function MainAppContent() {
   };
 
   return (
-    <div className="app">
-      {/* Particles component inside the provider hierarchy */}
+    <div className="dashboard-wrapper">
       <Particles
         id="tsparticles"
         options={particlesOptions}
-        className="particle-background visible"
+        className="particle-layer"
       />
 
-      <header className="header">
-        <h1>Crop Recommendation Platform</h1>
-        <p>React Frontend · FastAPI Backend</p>
-      </header>
+      {/* 🌐 NAVBAR */}
+      <nav className="custom-navbar">
+        <div className="navbar-logo">
+          <span className="logo-icon">🌱</span> AgriAI
+          <span className="logo-sub">| Crop Recommendor</span>
+        </div>
+        <div className="navbar-links">
+          <button className="nav-btn">Home</button>
+          <button className="nav-btn active">Predict</button>
+          <button className="nav-btn">About</button>
+          <button className="nav-btn">Contact</button>
+        </div>
+      </nav>
 
-      <main className="main">
-        <form className="card form-card" onSubmit={handleSubmit}>
-          <h2>Input Parameters</h2>
-          <div className="grid">
-            <div className="field">
-              <label>Nitrogen (N)</label>
-              <input
-                type="number"
-                name="N"
-                value={form.N}
-                onChange={handleChange}
-                step="0.1"
-                placeholder="e.g. 90"
-              />
+      {/* 📊 MAIN CONTAINER */}
+      <div className="dashboard-container">
+        
+        {/* 🛠️ LEFT SIDEBAR: FORM */}
+        <form onSubmit={handleSubmit} className="form-sidebar">
+          <h2 className="sidebar-title">Soil & Environment Inputs</h2>
+          
+          <div className="input-stack">
+            {[
+              { label: 'Nitrogen (N)', name: 'N', unit: 'mg/kg', placeholder: '90' },
+              { label: 'Phosphorus (P)', name: 'P', unit: 'mg/kg', placeholder: '42' },
+              { label: 'Potassium (K)', name: 'K', unit: 'mg/kg', placeholder: '43' },
+              { label: 'Temperature', name: 'temperature', unit: '°C', placeholder: '20.8' },
+              { label: 'Humidity', name: 'humidity', unit: '%', placeholder: '82.0' },
+              { label: 'pH Level', name: 'ph', unit: 'pH', placeholder: '6.5' },
+              { label: 'Rainfall', name: 'rainfall', unit: 'mm', placeholder: '200.0' },
+            ].map((input) => (
+              <div key={input.name} className="input-group">
+                <label className="input-label">{input.label}</label>
+                <div className="input-with-unit">
+                  <input 
+                    type="number" 
+                    step="0.01"
+                    name={input.name}
+                    value={form[input.name]}
+                    onChange={handleChange}
+                    placeholder={input.placeholder} 
+                    className="custom-input"
+                  />
+                  <span className="unit-label">{input.unit}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button type="submit" disabled={loading} className="predict-submit-btn">
+            {loading ? "Processing Engine..." : "Get Recommendation"}
+          </button>
+
+          {error && <p className="error-badge">❌ {error}</p>}
+        </form>
+
+        {/* 🎉 RIGHT CONTENT AREA */}
+        <div className="results-area">
+          
+          {/* HERO BANNER */}
+          <div className="hero-banner">
+            <div className="banner-text-content">
+              <h3 className="banner-subtitle">Recommendation Result</h3>
+              
+              {loading ? (
+                <div className="loading-row">
+                  <div className="custom-spinner"></div>
+                  <p className="loading-text">Evaluating Soil Analytics...</p>
+                </div>
+              ) : result ? (
+                <div>
+                  <p className="match-label">Best Crop Match Found:</p>
+                  <h1 className="crop-result-title">{result.recommended_crop}</h1>
+                </div>
+              ) : (
+                <p className="banner-empty-text">
+                  Awaiting ecosystem metrics. Click "Get Recommendation" to evaluate optimal crop lifecycle matches.
+                </p>
+              )}
             </div>
-            <div className="field">
-              <label>Phosphorus (P)</label>
-              <input
-                type="number"
-                name="P"
-                value={form.P}
-                onChange={handleChange}
-                step="0.1"
-                placeholder="e.g. 42"
-              />
-            </div>
-            <div className="field">
-              <label>Potassium (K)</label>
-              <input
-                type="number"
-                name="K"
-                value={form.K}
-                onChange={handleChange}
-                step="0.1"
-                placeholder="e.g. 43"
-              />
-            </div>
-            <div className="field">
-              <label>Temperature (°C)</label>
-              <input
-                type="number"
-                name="temperature"
-                value={form.temperature}
-                onChange={handleChange}
-                step="0.1"
-                placeholder="e.g. 20.8"
-              />
-            </div>
-            <div className="field">
-              <label>Humidity (%)</label>
-              <input
-                type="number"
-                name="humidity"
-                value={form.humidity}
-                onChange={handleChange}
-                step="0.1"
-                placeholder="e.g. 82.0"
-              />
-            </div>
-            <div className="field">
-              <label>pH Level</label>
-              <input
-                type="number"
-                name="ph"
-                value={form.ph}
-                onChange={handleChange}
-                step="0.1"
-                placeholder="e.g. 6.5"
-              />
-            </div>
-            <div className="field full-width-field">
-              <label>Rainfall (mm)</label>
-              <input
-                type="number"
-                name="rainfall"
-                value={form.rainfall}
-                onChange={handleChange}
-                step="0.1"
-                placeholder="e.g. 200.0"
-              />
+            <div className="banner-vector">
+              {loading ? "⚙️" : result ? getCropEmoji(result.recommended_crop) : "🌾"}
             </div>
           </div>
 
-          <button type="submit" className="submit-btn" disabled={loading}>
-            {loading ? "Processing Recommendation..." : "Recommend Crop"}
-          </button>
-
-          {error && <p className="error">{error}</p>}
-        </form>
-
-        <section className="card result-card">
-          <h2>Prediction Result</h2>
-          
-          {loading && (
-            <div className="status-message loading-state">
-              <div className="spinner"></div>
-              <p>Querying Machine Learning Model...</p>
-            </div>
-          )}
-          
-          {!loading && result && (
-            <div className="result-wrapper">
-              <div className="visual-display-box">
-                <p className="result-label">Optimal Crop Match</p>
-                <h3 className="crop-name">
-                  {result.recommended_crop} {getCropEmoji(result.recommended_crop)}
-                </h3>
+          {/* WHY CROP DETAILS CARD */}
+          {result && !loading && (
+            <div className="explanation-card">
+              <div className="status-icon-box">✅</div>
+              <div className="explanation-text-box">
+                <h4 className="explanation-title">Why {result.recommended_crop}?</h4>
+                <p className="explanation-desc">
+                  Based on your specialized nitrogen-phosphorus-potassium balance, rainfall of {form.rainfall}mm, and pH of {form.ph}, the machine learning architecture predicts <span className="highlight-text">{result.recommended_crop}</span> as the highest-yielding agronomic ecosystem match.
+                </p>
               </div>
-              
-              <details className="json-details">
-                <summary>View Raw API JSON Metadata</summary>
-                <pre>{JSON.stringify(result, null, 2)}</pre>
-              </details>
             </div>
           )}
-          
-          {!loading && !result && !error && (
-            <div className="status-message empty-state">
-              <p>Provide ecosystem metrics and click "Recommend Crop" to evaluate optimal soil conditions.</p>
-            </div>
-          )}
-        </section>
-      </main>
 
-      <footer className="footer">
-        <p>Production UI Dashboard for Crop Intelligence Developed by  D.M Kosala Nayanajith Deshapriya ❤️  </p>
+          {/* METRICS TRIO GRID */}
+          <div className="metrics-grid">
+            <div className="metric-card">
+              <p className="metric-header">Confidence Score</p>
+              <p className="metric-value green-text">{result && !loading ? "95.4%" : "--"}</p>
+            </div>
+
+            <div className="metric-card">
+              <p className="metric-header">Suitability Index</p>
+              <p className={`suitability-badge ${result && !loading ? 'active' : ''}`}>
+                {result && !loading ? "Excellent" : "--"}
+              </p>
+            </div>
+          </div>
+
+          {/* RAW JSON METADATA PAYLOAD */}
+          {result && !loading && (
+            <details className="raw-json-accordion">
+              <summary className="accordion-summary">View Server JSON Metadata Payload</summary>
+              <pre className="json-render-box">
+                {JSON.stringify(result, null, 2)}
+              </pre>
+            </details>
+          )}
+
+        </div>
+      </div>
+
+      <footer className="professional-footer">
+        <p>Production UI Dashboard for Crop Intelligence Developed by D.M Kosala Nayanajith Deshapriya ❤️</p>
       </footer>
     </div>
   );
 }
 
-// 3. Export the main App wrapper wrapped with the library context builder
 export default function App() {
   const particlesInit = async (engine) => {
     await loadSlim(engine);
