@@ -27,11 +27,12 @@ RUN npm run build
 # ======================
 FROM nginx:alpine
 
-# Copy built static files from build stage
-COPY --from=build /app/build /usr/share/nginx/html
+# 1. FIX: ඔයාගේ Custom Nginx config එක default.conf එකට Overwrite කිරීම
+# මේකෙන් තමයි React SPA routing (try_files) සහ /predict proxy එක හරියටම වැඩ කරවන්නේ!
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Use your custom Nginx config (should handle SPA routing with try_files)
-COPY nginx.conf /etc/nginx/nginx.conf
+# 2. Copy built static files from build stage
+COPY --from=build /app/build /usr/share/nginx/html
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
