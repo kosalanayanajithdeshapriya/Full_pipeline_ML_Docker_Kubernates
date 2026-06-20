@@ -3,7 +3,7 @@ version: "3.8"
 services:
   # 1. FastAPI Model Endpoint Engine (Pulled from Docker Hub)
   crop-api-service:
-    image: kosala2002/crop-backend:latest # 👈 Updated from 'build:' to utilize cloud registry
+    image: kosala2002/crop-backend:latest
     container_name: crop-api
     restart: unless-stopped
     expose:
@@ -16,7 +16,7 @@ services:
 
   # 2. Production React Compiled Frontend (Pulled from Docker Hub)
   frontend:
-    image: kosala2002/crop-frontend:latest # 👈 Updated from 'build:' to utilize cloud registry
+    image: kosala2002/crop-frontend:latest
     container_name: crop-frontend
     restart: unless-stopped
     expose:
@@ -24,7 +24,10 @@ services:
     environment:
       - VIRTUAL_HOST=croprecommendor.work.gd
       - LETSENCRYPT_HOST=croprecommendor.work.gd
-      - LETSENCRYPT_EMAIL=your_real_email@gmail.com # 👈 Keep your real email address active here
+      - LETSENCRYPT_EMAIL=deshapriyakosala@gmail.com # 👈 ඔයාගේ සැබෑ Email ලිපිනය මෙතනට ඇතුළත් කරන්න
+    volumes:
+      - html:/usr/share/nginx/html  # 👈 FIX: React බිල්ඩ් ෆයිල්ස් ටික Nginx Proxy එකට Share කිරීම
+      - vhost:/etc/nginx/vhost.d    # 👈 FIX: Vhost configurations ටික Proxy එකට Share කිරීම
     depends_on:
       - crop-api-service
 
