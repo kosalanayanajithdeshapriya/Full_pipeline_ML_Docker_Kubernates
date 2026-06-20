@@ -259,7 +259,7 @@ function MainAppContent() {
       </main>
 
       <footer className="footer">
-        <p>Production UI Dashboard for Crop Intelligence Developed by Kosala Nayanajith Deshapriya ❤️  </p>
+        <p>Production UI Dashboard for Crop Intelligence Developed by  D.M Kosala Nayanajith Deshapriya ❤️  </p>
       </footer>
     </div>
   );
