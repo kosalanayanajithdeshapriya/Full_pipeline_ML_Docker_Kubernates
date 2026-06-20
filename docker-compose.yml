@@ -1,70 +1,25 @@
 version: "3.8"
 
 services:
-  # 1. FastAPI Model Endpoint Engine (Pulled from Docker Hub)
+  # 1. FastAPI Backend Engine (Port 8000 public open කරයි)
   crop-api-service:
     image: kosala2002/crop-backend:latest
     container_name: crop-api
+    ports:
+      - "8000:8000"  # 👈 මින් පිටත සිටින අයට 8000 පෝට් එක හරහා API එකට සෘජුව කතා කළ හැක
     restart: unless-stopped
-    expose:
-      - "8000" # Internal communication within Docker bridge network
     environment:
       - UVICORN_HOST=0.0.0.0
       - UVICORN_PORT=8000
-      - VIRTUAL_HOST=api.croprecommendor.work.gd       # 👈 බැකෙන්ඩ් එක වෙනම api. sub-domain එකකට සම්බන්ධ කිරීම
-      - LETSENCRYPT_HOST=api.croprecommendor.work.gd   # 👈 බැකෙන්ඩ් සබ්-ඩොමේන් එකට SSL ලබාදීම
-      - LETSENCRYPT_EMAIL=deshapriyakosala@gmail.com
 
-  # 2. Production React Compiled Frontend (Built Locally from sub-folder)
+  # 2. Production React Frontend (Port 80 public open කරයි)
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: crop-frontend
+    ports:
+      - "80:80"      # 👈 බ්‍රවුසර් එකේ IP එක විතරක් ගැසූ විට (Default Port 80) කෙලින්ම UI එක ලෝඩ් වේ
     restart: unless-stopped
-    expose:
-      - "80" # Internal communication within Docker bridge network
-    environment:
-      - VIRTUAL_HOST=croprecommendor.work.gd           # 👈 ප්‍රධාන ඩොමේන් එකෙන් ෆ්‍රන්ටෙන්ඩ් එකට පැමිණීම
-      - LETSENCRYPT_HOST=croprecommendor.work.gd       # 👈 ෆ්‍රන්ටෙන්ඩ් ඩොමේන් එකට SSL ලබාදීම
-      - LETSENCRYPT_EMAIL=deshapriyakosala@gmail.com
     depends_on:
       - crop-api-service
-
-  # 3. Automated Nginx Reverse Proxy Engine
-  nginx-proxy:
-    image: nginxproxy/nginx-proxy
-    container_name: nginx-proxy
-    ports:
-      - "80:80"   # Handles public inbound HTTP traffic
-      - "443:443" # Handles public inbound secure HTTPS traffic
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - certs:/etc/nginx/certs
-      - vhost:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
-    restart: unless-stopped
-
-  # 4. Asynchronous Automated SSL Handler (Let's Encrypt Acme Companion)
-  acme-companion:
-    image: nginxproxy/acme-companion
-    container_name: acme-companion
-    environment:
-      - ACME_CA_URI=https://acme-staging-v02.api.letsencrypt.org/directory # 👈 Let's Encrypt Rate Limit ප්‍රශ්නය මඟහැරීමට Staging URI එක
-      - NGINX_PROXY_CONTAINER=nginx-proxy
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - certs:/etc/nginx/certs
-      - vhost:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
-      - acme:/etc/acme.sh
-    depends_on:
-      - nginx-proxy
-    restart: unless-stopped
-
-# Named volumes used to securely share SSL keys and configs across the proxy containers
-volumes:
-  certs:
-  vhost:
-  html:
-  acme:
