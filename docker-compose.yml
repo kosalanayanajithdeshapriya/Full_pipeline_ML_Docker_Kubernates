@@ -3,7 +3,7 @@ version: "3.8"
 services:
   # 1. FastAPI Model Endpoint Engine (Pulled from Docker Hub)
   crop-api-service:
-    image: kosala2002/crop-backend:latest  # 👈 බැකෙන්ඩ් ඉමේජ් එක මෙතනට විතරයි එන්න ඕනේ!
+    image: kosala2002/crop-backend:latest
     container_name: crop-api
     restart: unless-stopped
     expose:
@@ -12,11 +12,11 @@ services:
       - UVICORN_HOST=0.0.0.0
       - UVICORN_PORT=8000
 
-  # 2. Production React Compiled Frontend (Built Locally)
+  # 2. Production React Compiled Frontend (Built Locally from sub-folder)
   frontend:
     build:
-      context: .
-      dockerfile: Dockerfile  # 👈 ඔයාගේ ලෝකල් React Dockerfile එක කියවන්නේ මෙතනින්!
+      context: ./frontend  # 👈 FIX: Root එකේ තියෙන Python එක වෙනුවට React code තියෙන folder එක දීම
+      dockerfile: Dockerfile
     container_name: crop-frontend
     restart: unless-stopped
     expose:
@@ -36,8 +36,8 @@ services:
     image: nginxproxy/nginx-proxy
     container_name: nginx-proxy
     ports:
-      - "80:80"   
-      - "443:443" 
+      - "80:80"   # Handles public inbound HTTP traffic
+      - "443:443" # Handles public inbound secure HTTPS traffic
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - certs:/etc/nginx/certs
@@ -50,8 +50,8 @@ services:
     image: nginxproxy/acme-companion
     container_name: acme-companion
     environment:
-      - ACME_CA_URI=https://acme-staging-v02.api.letsencrypt.org/directory # 👈 Staging URI එක
-      - NGINX_PROXY_CONTAINER=nginx-proxy 
+      - ACME_CA_URI=https://acme-staging-v02.api.letsencrypt.org/directory # 👈 FIX: Rate limit නොවී staging හරහා SSL ලැබීමට
+      - NGINX_PROXY_CONTAINER=nginx-proxy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - certs:/etc/nginx/certs
@@ -62,6 +62,7 @@ services:
       - nginx-proxy
     restart: unless-stopped
 
+# Named volumes used to securely share SSL keys and configs across the proxy containers
 volumes:
   certs:
   vhost:
