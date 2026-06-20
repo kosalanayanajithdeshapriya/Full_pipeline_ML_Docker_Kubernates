@@ -22,7 +22,8 @@ function MainAppContent() {
 
   //const API_URL =
     //process.env.REACT_APP_API_URL || "http://98.93.30.243:8000/predict";
-  const API_URL = process.env.REACT_APP_API_URL || "/predict";
+  const API_URL = "https://api.croprecommendor.work.gd/predict";
+  
     //const API_URL = process.env.REACT_APP_API_URL || "https://croprecommendor.work.gd/predict";
 
   const handleChange = (e) => {

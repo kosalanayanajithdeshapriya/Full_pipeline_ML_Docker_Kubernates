@@ -11,23 +11,23 @@ services:
     environment:
       - UVICORN_HOST=0.0.0.0
       - UVICORN_PORT=8000
+      - VIRTUAL_HOST=api.croprecommendor.work.gd       # 👈 බැකෙන්ඩ් එක වෙනම api. sub-domain එකකට සම්බන්ධ කිරීම
+      - LETSENCRYPT_HOST=api.croprecommendor.work.gd   # 👈 බැකෙන්ඩ් සබ්-ඩොමේන් එකට SSL ලබාදීම
+      - LETSENCRYPT_EMAIL=deshapriyakosala@gmail.com
 
   # 2. Production React Compiled Frontend (Built Locally from sub-folder)
   frontend:
     build:
-      context: ./frontend  # 👈 FIX: Root එකේ තියෙන Python එක වෙනුවට React code තියෙන folder එක දීම
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: crop-frontend
     restart: unless-stopped
     expose:
       - "80" # Internal communication within Docker bridge network
     environment:
-      - VIRTUAL_HOST=croprecommendor.work.gd
-      - LETSENCRYPT_HOST=croprecommendor.work.gd
+      - VIRTUAL_HOST=croprecommendor.work.gd           # 👈 ප්‍රධාන ඩොමේන් එකෙන් ෆ්‍රන්ටෙන්ඩ් එකට පැමිණීම
+      - LETSENCRYPT_HOST=croprecommendor.work.gd       # 👈 ෆ්‍රන්ටෙන්ඩ් ඩොමේන් එකට SSL ලබාදීම
       - LETSENCRYPT_EMAIL=deshapriyakosala@gmail.com
-    volumes:
-      - html:/usr/share/nginx/html
-      - vhost:/etc/nginx/vhost.d
     depends_on:
       - crop-api-service
 
@@ -50,7 +50,7 @@ services:
     image: nginxproxy/acme-companion
     container_name: acme-companion
     environment:
-      - ACME_CA_URI=https://acme-staging-v02.api.letsencrypt.org/directory # 👈 FIX: Rate limit නොවී staging හරහා SSL ලැබීමට
+      - ACME_CA_URI=https://acme-staging-v02.api.letsencrypt.org/directory # 👈 Let's Encrypt Rate Limit ප්‍රශ්නය මඟහැරීමට Staging URI එක
       - NGINX_PROXY_CONTAINER=nginx-proxy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
