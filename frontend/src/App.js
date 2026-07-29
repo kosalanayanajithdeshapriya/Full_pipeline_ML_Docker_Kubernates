@@ -19,7 +19,7 @@ function MainAppContent() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
 
-  const API_URL = "http://98.93.30.243:8000/predict";
+  const API_URL = "http://34.224.218.115:8000/predict";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
